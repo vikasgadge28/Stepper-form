@@ -1,6 +1,6 @@
 /** @format */
 
-import React from "react";
+import React, { useState } from "react";
 import { useFormContext } from "../useContext";
 import Button from "@mui/material/Button";
 import { TextField, Box, Typography, Grid } from "@mui/material";
@@ -8,8 +8,27 @@ import { TextField, Box, Typography, Grid } from "@mui/material";
 const FirstStep = () => {
   const { formData, updateFormData, activeStepCount, setActiveStepCount } =
     useFormContext();
+
+  const [errors, setErrors] = useState({
+    employeeId: false,
+    employeeName: false,
+    employeeNumber: false,
+  });
+
+  const validateFields = () => {
+    const newErrors = {
+      employeeId: !formData.employeeId,
+      employeeName: !formData.employeeName,
+      employeeNumber: !formData.employeeNumber,
+    };
+    setErrors(newErrors);
+    return !Object.values(newErrors).includes(true); // Check if all fields are valid
+  };
+
   const handleStepNext = () => {
-    setActiveStepCount((prevActiveStep) => prevActiveStep + 1);
+    if (validateFields()) {
+      setActiveStepCount((prevActiveStep) => prevActiveStep + 1);
+    }
   };
 
   return (
@@ -19,7 +38,8 @@ const FirstStep = () => {
       </Typography>
       <Box
         component="form"
-        sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+      >
         <TextField
           label="Employee ID"
           name="employeeId"
@@ -28,6 +48,8 @@ const FirstStep = () => {
           onChange={(e) => updateFormData("employeeId", e.target.value)}
           variant="outlined"
           fullWidth
+          error={errors.employeeId}
+          helperText={errors.employeeId && "Employee ID is required"}
         />
         <TextField
           label="Employee Name"
@@ -36,6 +58,8 @@ const FirstStep = () => {
           onChange={(e) => updateFormData("employeeName", e.target.value)}
           variant="outlined"
           fullWidth
+          error={errors.employeeName}
+          helperText={errors.employeeName && "Employee Name is required"}
         />
         <TextField
           label="Employee Number"
@@ -45,6 +69,8 @@ const FirstStep = () => {
           onChange={(e) => updateFormData("employeeNumber", e.target.value)}
           variant="outlined"
           fullWidth
+          error={errors.employeeNumber}
+          helperText={errors.employeeNumber && "Employee Number is required"}
         />
       </Box>
 
@@ -54,8 +80,8 @@ const FirstStep = () => {
             fullWidth
             color="primary"
             disabled={activeStepCount === 0}
-           
-            variant="outlined">
+            variant="outlined"
+          >
             Previous
           </Button>
         </Grid>
@@ -65,7 +91,8 @@ const FirstStep = () => {
             fullWidth
             variant="contained"
             color="primary"
-            onClick={handleStepNext}>
+            onClick={handleStepNext}
+          >
             Next
           </Button>
         </Grid>

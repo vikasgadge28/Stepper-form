@@ -1,18 +1,40 @@
 /** @format */
 
-import React from "react";
-import { TextField, Box, Typography, MenuItem,Grid } from "@mui/material";
+import React, { useState } from "react";
+import { TextField, Box, Typography, MenuItem, Grid } from "@mui/material";
 import { useFormContext } from "../useContext";
 import Button from "@mui/material/Button";
 
 const SecondStep = () => {
-  const { formData, updateFormData,setActiveStepCount,activeStepCount } = useFormContext();
-  const handleStepNext = () => {
-    setActiveStepCount((prevActiveStep) => prevActiveStep + 1);
+  const { formData, updateFormData, setActiveStepCount, activeStepCount } =
+    useFormContext();
+
+  const [errors, setErrors] = useState({
+    employeeAddress: false,
+    employeeEmail: false,
+    department: false,
+  });
+
+  const validateFields = () => {
+    const newErrors = {
+      employeeAddress: !formData.employeeAddress,
+      employeeEmail: !formData.employeeEmail || !/\S+@\S+\.\S+/.test(formData.employeeEmail),
+      department: !formData.department,
+    };
+    setErrors(newErrors);
+    return !Object.values(newErrors).includes(true); // Check if all fields are valid
   };
+
+  const handleStepNext = () => {
+    if (validateFields()) {
+      setActiveStepCount((prevActiveStep) => prevActiveStep + 1);
+    }
+  };
+
   const handleStepBack = () => {
     setActiveStepCount((prevActiveStep) => prevActiveStep - 1);
-};
+  };
+
   const departments = ["HR", "Engineering", "Marketing", "Sales"];
 
   return (
@@ -22,7 +44,8 @@ const SecondStep = () => {
       </Typography>
       <Box
         component="form"
-        sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+      >
         <TextField
           label="Employee Address"
           name="employeeAddress"
@@ -32,6 +55,8 @@ const SecondStep = () => {
           fullWidth
           multiline
           rows={3}
+          error={errors.employeeAddress}
+          helperText={errors.employeeAddress && "Employee Address is required"}
         />
         <TextField
           label="Employee Email"
@@ -41,6 +66,13 @@ const SecondStep = () => {
           onChange={(e) => updateFormData("employeeEmail", e.target.value)}
           variant="outlined"
           fullWidth
+          error={errors.employeeEmail}
+          helperText={
+            errors.employeeEmail &&
+            (formData.employeeEmail
+              ? "Invalid email format"
+              : "Employee Email is required")
+          }
         />
         <TextField
           label="Department"
@@ -49,7 +81,10 @@ const SecondStep = () => {
           onChange={(e) => updateFormData("department", e.target.value)}
           variant="outlined"
           select
-          fullWidth>
+          fullWidth
+          error={errors.department}
+          helperText={errors.department && "Department is required"}
+        >
           {departments.map((dept) => (
             <MenuItem key={dept} value={dept}>
               {dept}
@@ -64,7 +99,8 @@ const SecondStep = () => {
             color="primary"
             disabled={activeStepCount === 0}
             onClick={handleStepBack}
-            variant="outlined">
+            variant="outlined"
+          >
             Previous
           </Button>
         </Grid>
@@ -74,7 +110,8 @@ const SecondStep = () => {
             fullWidth
             variant="contained"
             color="primary"
-            onClick={handleStepNext}>
+            onClick={handleStepNext}
+          >
             Next
           </Button>
         </Grid>
